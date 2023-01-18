@@ -19,9 +19,18 @@
 	});
 </script>
 
+<svelte:head>
+    <title>World Wide Webcam</title>
+</svelte:head>
+
 <div class="page-wrapper">
     <!-- svelte-ignore a11y-media-has-caption -->
-    <video class="video-element" autoplay={true} bind:this={videoElement} />
+    <video class="video-element"
+        autoplay={true}
+        playsInline={true}
+        muted={true}
+        bind:this={videoElement}
+    />
 </div>
 
 <style>

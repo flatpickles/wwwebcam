@@ -1,2 +1,38 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+    import 'ress';
+
+	import { onMount } from 'svelte';
+
+	let videoElement: HTMLVideoElement;
+
+	onMount(() => {
+		if (navigator.mediaDevices.getUserMedia) {
+			navigator.mediaDevices
+				.getUserMedia({ video: true })
+				.then(function (stream) {
+					videoElement.srcObject = stream;
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+		}
+	});
+</script>
+
+<div class="page-wrapper">
+    <!-- svelte-ignore a11y-media-has-caption -->
+    <video class="video-element" autoplay={true} bind:this={videoElement} />
+</div>
+
+<style>
+    .page-wrapper {
+        width: 100vw;
+        height: 100vh;
+
+        display: flex;
+        background-color: black;
+    }
+    .video-element {
+        flex-grow: 1;
+    }
+</style>

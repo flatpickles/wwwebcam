@@ -1,11 +1,57 @@
 <script lang="ts">
     import 'ress';
 	import { onMount } from 'svelte';
+    import reglConstructor, { type Regl } from 'regl';
 
 	let videoElement: HTMLVideoElement;
+    let canvasElement: HTMLCanvasElement;
     let devices: MediaDeviceInfo[];
     let errorString: string;
     let selfieMode = true;
+
+    // NEXT: try fixing type errors with this:
+    // https://github.com/regl-project/regl/blob/master/example/typescript/dynamic.ts#L49
+
+    function startRegl() {
+        const regl = reglConstructor(canvasElement);
+
+        const drawFrame = regl({
+            frag: `
+            precision mediump float;
+            uniform sampler2D texture;
+            varying vec2 uv;
+            void main () {
+                gl_FragColor = texture2D(texture, uv);
+            }`,
+
+            vert: `
+            precision mediump float;
+            attribute vec2 position;
+            varying vec2 uv;
+            void main () {
+                uv = position;
+                gl_Position = vec4(1.0 - 2.0 * position, 0, 1);
+            }`,
+
+            attributes: {
+                position: [
+                -2, 0,
+                0, -2,
+                2, 2]
+            },
+
+            uniforms: {
+                texture: regl.prop('video')
+            },
+
+            count: 3
+        })();
+
+        var videoTexture = regl.texture(videoElement);
+        regl.frame(() => {
+            drawFrame({ video: videoTexture.subimage(videoElement) })
+        });
+    }
 
 	onMount(async () => {
 		startStream(selfieMode);
@@ -27,6 +73,7 @@
             })
             .then(function (stream) {
                 videoElement.srcObject = stream;
+                videoElement.onloadeddata = startRegl;
             })
             .catch((error) => {
                 errorString = error.message;
@@ -70,6 +117,10 @@
         playsInline={true}
         muted={true}
         bind:this={videoElement}
+
+    />
+    <canvas class="canvas-element" 
+        bind:this={canvasElement}
     />
 </div>
 
@@ -92,6 +143,11 @@
         width: 100%;
         object-fit: cover;
         transform: rotateY(180deg);
+    }
+
+    .canvas-element {
+        width: 100%;
+        height: 100%;
     }
 
     .video-overlay {

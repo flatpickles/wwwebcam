@@ -1,7 +1,7 @@
 <script lang="ts">
     import 'ress';
 	import { onMount } from 'svelte';
-    import reglConstructor, { type Regl } from 'regl';
+    import REGL, { type Regl } from 'regl';
 
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
@@ -12,16 +12,30 @@
     // NEXT: try fixing type errors with this:
     // https://github.com/regl-project/regl/blob/master/example/typescript/dynamic.ts#L49
 
-    function startRegl() {
-        const regl = reglConstructor(canvasElement);
 
-        const drawFrame = regl({
+    interface Uniforms {
+        videoFrame: REGL.Texture;
+    }
+
+    interface Attributes {
+        position: number[];
+    }
+
+    interface Props {
+        videoFrame: REGL.Texture;
+    }
+
+    function startRegl() {
+        const regl = REGL(canvasElement);
+
+        const drawFrame = regl<Uniforms, Attributes, Props>({
             frag: `
             precision mediump float;
-            uniform sampler2D texture;
+            uniform sampler2D videoFrame;
             varying vec2 uv;
             void main () {
-                gl_FragColor = texture2D(texture, uv);
+                gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+                gl_FragColor = texture2D(videoFrame, uv);
             }`,
 
             vert: `
@@ -41,15 +55,17 @@
             },
 
             uniforms: {
-                texture: regl.prop('video')
+                videoFrame: regl.prop<Uniforms, 'videoFrame'>('videoFrame')
             },
 
             count: 3
-        })();
+        });
 
-        var videoTexture = regl.texture(videoElement);
         regl.frame(() => {
-            drawFrame({ video: videoTexture.subimage(videoElement) })
+            regl.clear({
+                color: [0, 0, 0, 1]
+            });
+            drawFrame({ videoFrame: regl.texture(videoElement) });
         });
     }
 

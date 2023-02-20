@@ -1,7 +1,7 @@
 <script lang="ts">
     import 'ress';
 	import { onMount } from 'svelte';
-    import REGL, { type Regl } from 'regl';
+    import REGL from 'regl';
 
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
@@ -9,11 +9,11 @@
     let errorString: string;
     let selfieMode = true;
 
-    // NEXT: try fixing type errors with this:
-    // https://github.com/regl-project/regl/blob/master/example/typescript/dynamic.ts#L49
-
+    // Type definitions
 
     interface Uniforms {
+        renderSize: REGL.Vec2,
+        videoSize: REGL.Vec2,
         videoFrame: REGL.Texture;
     }
 
@@ -22,8 +22,12 @@
     }
 
     interface Props {
+        renderSize: REGL.Vec2,
+        videoSize: REGL.Vec2,
         videoFrame: REGL.Texture;
     }
+
+    // Display stuff
 
     function startRegl() {
         const regl = REGL(canvasElement);
@@ -31,11 +35,26 @@
         const drawFrame = regl<Uniforms, Attributes, Props>({
             frag: `
             precision mediump float;
+            uniform vec2 renderSize;
+            uniform vec2 videoSize;
             uniform sampler2D videoFrame;
             varying vec2 uv;
             void main () {
-                vec4 texVal = texture2D(videoFrame, uv);
-                gl_FragColor = texVal * step(uv.x - uv.y, 0.5);
+                vec2 texCoords = uv;
+                float renderRatio = renderSize.x / renderSize.y;
+                float videoRatio = videoSize.x / videoSize.y;
+
+                if (renderRatio < videoRatio) {
+                    float relativeWidth = renderRatio / videoRatio;
+                    texCoords.x *= relativeWidth;
+                    texCoords.x += (1.0 - relativeWidth) / 2.0;
+                } else {
+                    float relativeHeight = videoRatio / renderRatio;
+                    texCoords.y *= relativeHeight;
+                    texCoords.y += (1.0 - relativeHeight) / 2.0;
+                }
+
+                vec4 texVal = texture2D(videoFrame, texCoords);
                 gl_FragColor = vec4(texVal.g, texVal.b, texVal.r, 1.0);
             }`,
 
@@ -56,32 +75,39 @@
             },
 
             uniforms: {
+                renderSize: regl.prop<Uniforms, 'renderSize'>('renderSize'),
+                videoSize: regl.prop<Uniforms, 'videoSize'>('videoSize'),
                 videoFrame: regl.prop<Uniforms, 'videoFrame'>('videoFrame')
             },
 
             count: 3
         });
 
+        const cameraTexture = regl.texture(); // construct texture
         regl.frame(() => {
             regl.clear({
                 color: [0, 0, 0, 1]
             });
             drawFrame({
-                videoFrame: regl.texture({
+                renderSize: [canvasElement.width, canvasElement.height],
+                videoSize: [videoElement.videoWidth, videoElement.videoHeight],
+                videoFrame: cameraTexture({
                     data: videoElement,
                     mag: 'linear',
                     min: 'linear'
-                }) 
+                }) // update and use texture
             });
         });
     }
 
+    // Lifecycle & interaction stuff
+
 	onMount(async () => {
-        // setup canvas 
+        // setup canvas
+        // todo: update with resize
         var devicePixelRatio = window.devicePixelRatio || 1;
         canvasElement.width = canvasElement.clientWidth * devicePixelRatio;
         canvasElement.height = canvasElement.clientHeight * devicePixelRatio;
-        const ratio = canvasElement.clientWidth / canvasElement.clientHeight;
 
 		startStream(selfieMode);
         devices = await navigator.mediaDevices.enumerateDevices();
@@ -110,6 +136,7 @@
     }
 
     function clicked() {
+        // todo: can it flip?
         selfieMode = !selfieMode;
         startStream(selfieMode);
     }
@@ -168,17 +195,16 @@
     }
 
     .video-element {
+        visibility: hidden;
         position: absolute;
-        z-index: -2;
-        height: 100%;
-        object-fit: cover;
-        overflow: hidden;
-        transform: rotateY(180deg);
+        max-width: 100%;
+        max-height: 100%;
+        z-index: -1;
     }
 
     .canvas-element {
         width: 100%;
-        object-fit: cover;
+        height: 100%;
     }
 
     .video-overlay {

@@ -34,8 +34,9 @@
             uniform sampler2D videoFrame;
             varying vec2 uv;
             void main () {
-                gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
-                gl_FragColor = texture2D(videoFrame, uv);
+                vec4 texVal = texture2D(videoFrame, uv);
+                gl_FragColor = texVal * step(uv.x - uv.y, 0.5);
+                gl_FragColor = vec4(texVal.g, texVal.b, texVal.r, 1.0);
             }`,
 
             vert: `
@@ -65,11 +66,23 @@
             regl.clear({
                 color: [0, 0, 0, 1]
             });
-            drawFrame({ videoFrame: regl.texture(videoElement) });
+            drawFrame({
+                videoFrame: regl.texture({
+                    data: videoElement,
+                    mag: 'linear',
+                    min: 'linear'
+                }) 
+            });
         });
     }
 
 	onMount(async () => {
+        // setup canvas 
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        canvasElement.width = canvasElement.clientWidth * devicePixelRatio;
+        canvasElement.height = canvasElement.clientHeight * devicePixelRatio;
+        const ratio = canvasElement.clientWidth / canvasElement.clientHeight;
+
 		startStream(selfieMode);
         devices = await navigator.mediaDevices.enumerateDevices();
         devices = devices.filter((device) => device.kind === 'videoinput');
@@ -133,7 +146,6 @@
         playsInline={true}
         muted={true}
         bind:this={videoElement}
-
     />
     <canvas class="canvas-element" 
         bind:this={canvasElement}
@@ -156,14 +168,17 @@
     }
 
     .video-element {
-        width: 100%;
+        position: absolute;
+        z-index: -2;
+        height: 100%;
         object-fit: cover;
+        overflow: hidden;
         transform: rotateY(180deg);
     }
 
     .canvas-element {
         width: 100%;
-        height: 100%;
+        object-fit: cover;
     }
 
     .video-overlay {

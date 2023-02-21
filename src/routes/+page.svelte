@@ -31,7 +31,6 @@
 
     function startRegl() {
         const regl = REGL(canvasElement);
-
         const drawFrame = regl<Uniforms, Attributes, Props>({
             frag: `
             precision mediump float;
@@ -40,22 +39,17 @@
             uniform sampler2D videoFrame;
             varying vec2 uv;
             void main () {
-                vec2 texCoords = uv;
+                // Calculate texture lookup position
                 float renderRatio = renderSize.x / renderSize.y;
                 float videoRatio = videoSize.x / videoSize.y;
+                float relativeWidth = min(1.0, renderRatio / videoRatio);
+                float relativeHeight = min(1.0, videoRatio / renderRatio);
+                float lookupX = uv.x * relativeWidth + (1.0 - relativeWidth) / 2.0;
+                float lookupY = uv.y * relativeHeight + (1.0 - relativeHeight) / 2.0;
 
-                if (renderRatio < videoRatio) {
-                    float relativeWidth = renderRatio / videoRatio;
-                    texCoords.x *= relativeWidth;
-                    texCoords.x += (1.0 - relativeWidth) / 2.0;
-                } else {
-                    float relativeHeight = videoRatio / renderRatio;
-                    texCoords.y *= relativeHeight;
-                    texCoords.y += (1.0 - relativeHeight) / 2.0;
-                }
-
-                vec4 texVal = texture2D(videoFrame, texCoords);
-                gl_FragColor = vec4(texVal.g, texVal.b, texVal.r, 1.0);
+                // Lookup and output
+                vec4 texVal = texture2D(videoFrame, vec2(lookupX, lookupY));
+                gl_FragColor = vec4(texVal.g, texVal.r, texVal.b, 1.0);
             }`,
 
             vert: `
@@ -69,9 +63,10 @@
 
             attributes: {
                 position: [
-                -2, 0,
-                0, -2,
-                2, 2]
+                    -2, 0,
+                    0, -2,
+                    2, 2
+                ]
             },
 
             uniforms: {
@@ -89,6 +84,7 @@
                 color: [0, 0, 0, 1]
             });
             drawFrame({
+                // todo: canvasElement is null sometimes?
                 renderSize: [canvasElement.width, canvasElement.height],
                 videoSize: [videoElement.videoWidth, videoElement.videoHeight],
                 videoFrame: cameraTexture({
@@ -103,17 +99,22 @@
     // Lifecycle & interaction stuff
 
 	onMount(async () => {
-        // setup canvas
-        // todo: update with resize
-        var devicePixelRatio = window.devicePixelRatio || 1;
-        canvasElement.width = canvasElement.clientWidth * devicePixelRatio;
-        canvasElement.height = canvasElement.clientHeight * devicePixelRatio;
+        // Setup canvas sizing
+        window.onresize = updateCanvasShape;
+        updateCanvasShape();
 
+        // Start video
 		startStream(selfieMode);
         devices = await navigator.mediaDevices.enumerateDevices();
         devices = devices.filter((device) => device.kind === 'videoinput');
 	});
     
+    function updateCanvasShape() {
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        canvasElement.width = canvasElement.clientWidth * devicePixelRatio;
+        canvasElement.height = canvasElement.clientHeight * devicePixelRatio;
+    }
+
     function startStream(frontFacing: boolean) {
         if (!navigator.mediaDevices.getUserMedia) {
             errorString = 'getUserMedia undefined';

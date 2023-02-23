@@ -97,11 +97,18 @@
     }
 
     // Lifecycle & interaction stuff
+    
+    let vh: number;
 
 	onMount(async () => {
+        // Set up page sizing
+        const setVH = () => { vh = window.innerHeight * 0.01; };
+        window.addEventListener('resize', setVH);
+        setVH();
+
         // Setup canvas sizing
         window.onresize = updateCanvasShape;
-        updateCanvasShape();
+        setTimeout(updateCanvasShape, 0); // after setVH (todo clean up)
 
         // Start video
 		startStream(selfieMode);
@@ -167,7 +174,7 @@
     </div>
 </div>
 
-<div class="video-wrapper">
+<div class="video-wrapper" style="--vh: {vh}">
     <!-- svelte-ignore a11y-media-has-caption -->
     <video class="video-element"
         autoplay={true}
@@ -190,6 +197,7 @@
     .video-wrapper {
         width: 100vw;
         height: 100vh;
+        height: calc(var(--vh, 1vh) * 100px);
 
         display: flex;
         background-color: black;

@@ -29,6 +29,8 @@
     // Display stuff
 
     function startRegl() {
+        updateCanvasShape(); // as late as possible
+
         const regl = REGL(canvasElement);
         const drawFrame = regl<Uniforms, Attributes, Props>({
             frag: `
@@ -100,7 +102,6 @@
 	onMount(async () => {
         // Setup canvas sizing
         window.onresize = updateCanvasShape;
-        setTimeout(updateCanvasShape, 0); // after setVH (todo clean up)
 
         // Start video
 		startStream(selfieMode);

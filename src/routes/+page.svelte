@@ -1,7 +1,6 @@
 <script lang="ts">
-    import 'ress';
-	import { onMount } from 'svelte';
     import REGL from 'regl';
+	import { onMount } from 'svelte';
 
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
@@ -97,15 +96,8 @@
     }
 
     // Lifecycle & interaction stuff
-    
-    let vh: number;
 
 	onMount(async () => {
-        // Set up page sizing
-        const setVH = () => { vh = window.innerHeight * 0.01; };
-        window.addEventListener('resize', setVH);
-        setVH();
-
         // Setup canvas sizing
         window.onresize = updateCanvasShape;
         setTimeout(updateCanvasShape, 0); // after setVH (todo clean up)
@@ -174,33 +166,22 @@
     </div>
 </div>
 
-<div class="video-wrapper" style="--vh: {vh}">
-    <!-- svelte-ignore a11y-media-has-caption -->
-    <video class="video-element"
-        autoplay={true}
-        playsInline={true}
-        muted={true}
-        bind:this={videoElement}
-    />
-    <canvas class="canvas-element" 
-        bind:this={canvasElement}
-    />
-</div>
+<!-- svelte-ignore a11y-media-has-caption -->
+<video class="video-element"
+    autoplay={true}
+    playsInline={true}
+    muted={true}
+    bind:this={videoElement}
+/>
+<canvas class="canvas-element" 
+    bind:this={canvasElement}
+/>
 
 <style>
     button {
         background-color: white;
         margin-top: 1em;
         margin-bottom: 1em;
-    }
-
-    .video-wrapper {
-        width: 100vw;
-        height: 100vh;
-        height: calc(var(--vh, 1vh) * 100px);
-
-        display: flex;
-        background-color: black;
     }
 
     .video-element {

@@ -1,0 +1,4 @@
+html, body {
+    overflow: hidden; // no scrolling
+    user-select: none; // no text selection
+}

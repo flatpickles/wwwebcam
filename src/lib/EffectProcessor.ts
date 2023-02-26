@@ -83,7 +83,7 @@ export default class EffectProcessor {
         if (this.tick) this.tick.cancel;
 
         const cameraTexture = this.regl.texture(); // construct texture
-        this.regl.frame(() => {
+        this.tick = this.regl.frame(() => {
             this.regl.clear({
                 color: [0, 0, 0, 1]
             });

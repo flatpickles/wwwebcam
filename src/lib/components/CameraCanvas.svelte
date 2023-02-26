@@ -1,60 +1,28 @@
 <script lang="ts">
 	import EffectProcessor from '$lib/EffectProcessor';
+	import WebCam from '$lib/WebCam';
 	import { onMount } from 'svelte';
-
-    // todo: external interface
-    export const flippable = false;
-    export function flip() {}
-    export function setPixelShader() {};
 
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
-    let devices: MediaDeviceInfo[];
-    let errorString: string;
-    let selfieMode = true;
-
-    // Lifecycle & interaction stuff
 
 	onMount(async () => {
         // Setup canvas sizing
         window.onresize = updateCanvasShape;
+        setTimeout(updateCanvasShape, 0);
 
         // Start video
-		startStream(selfieMode);
-        devices = await navigator.mediaDevices.enumerateDevices();
-        devices = devices.filter((device) => device.kind === 'videoinput');
+        const webCam = new WebCam(videoElement);
+        webCam.start().then(() => {
+            const processor = new EffectProcessor(videoElement, canvasElement);
+            processor.start();
+        });
 	});
     
     function updateCanvasShape() {
         var devicePixelRatio = window.devicePixelRatio || 1;
         canvasElement.width = canvasElement.clientWidth * devicePixelRatio;
         canvasElement.height = canvasElement.clientHeight * devicePixelRatio;
-    }
-
-    function startStream(frontFacing: boolean) {
-        if (!navigator.mediaDevices.getUserMedia) {
-            errorString = 'getUserMedia undefined';
-            return;
-        };
-
-        navigator.mediaDevices
-            .getUserMedia({
-                video: {
-                    facingMode: frontFacing ? 'user' : 'environment'
-                }
-            })
-            .then(function (stream) {
-                videoElement.srcObject = stream;
-                videoElement.onloadeddata = () => {
-                    updateCanvasShape();
-
-                    const processor = new EffectProcessor(videoElement, canvasElement);
-                    processor.start();
-                }
-            })
-            .catch((error) => {
-                errorString = error.message;
-            });
     }
 </script>
 

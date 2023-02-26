@@ -1,5 +1,6 @@
 <script lang="ts">
     import REGL from 'regl';
+    import createQuad from 'primitive-quad';
 	import { onMount } from 'svelte';
 
     // todo: external interface
@@ -17,8 +18,8 @@
 
     interface Uniforms {
         renderSize: REGL.Vec2,
-        videoSize: REGL.Vec2,
-        videoFrame: REGL.Texture;
+        inputSize: REGL.Vec2,
+        inputImage: REGL.Texture;
     }
 
     interface Attributes {
@@ -27,62 +28,61 @@
 
     interface Props {
         renderSize: REGL.Vec2,
-        videoSize: REGL.Vec2,
-        videoFrame: REGL.Texture;
+        inputSize: REGL.Vec2,
+        inputImage: REGL.Texture;
     }
-
 
     // Display stuff
 
     function startRegl() {
         updateCanvasShape(); // as late as possible
 
+        const quad = createQuad();
         const regl = REGL(canvasElement);
         const drawFrame = regl<Uniforms, Attributes, Props>({
             frag: `
             precision mediump float;
-            uniform vec2 renderSize;
-            uniform vec2 videoSize;
-            uniform sampler2D videoFrame;
+            uniform sampler2D inputImage;
             varying vec2 uv;
+            varying vec2 lookup;
+            
             void main () {
-                // Calculate texture lookup position
-                float renderRatio = renderSize.x / renderSize.y;
-                float videoRatio = videoSize.x / videoSize.y;
-                float relativeWidth = min(1.0, renderRatio / videoRatio);
-                float relativeHeight = min(1.0, videoRatio / renderRatio);
-                float lookupX = uv.x * relativeWidth + (1.0 - relativeWidth) / 2.0;
-                float lookupY = uv.y * relativeHeight + (1.0 - relativeHeight) / 2.0;
-
-                // Lookup and output
-                vec4 texVal = texture2D(videoFrame, vec2(lookupX, lookupY));
-                gl_FragColor = vec4(texVal.g, texVal.r, texVal.b, 1.0);
+                vec4 texVal = texture2D(inputImage, lookup);
+                gl_FragColor = vec4(vec3(texVal.g), 1.0);
             }`,
 
             vert: `
             precision mediump float;
-            attribute vec2 position;
+            attribute vec3 position;
+            uniform vec2 renderSize;
+            uniform vec2 inputSize;
             varying vec2 uv;
+            varying vec2 lookup;
+
             void main () {
-                uv = position;
-                gl_Position = vec4(1.0 - 2.0 * position, 0, 1);
+                // Set render positions
+                gl_Position = vec4(position.xyz, 1.0);
+                uv = gl_Position.xy * 0.5 + 0.5;
+
+                // Calculate aspect-corrected texture lookup position
+                float renderRatio = renderSize.x / renderSize.y;
+                float videoRatio = inputSize.x / inputSize.y;
+                float relativeWidth = min(1.0, renderRatio / videoRatio);
+                float relativeHeight = min(1.0, videoRatio / renderRatio);
+                lookup.x = (1.0 - uv.x) * relativeWidth + (1.0 - relativeWidth) / 2.0;
+                lookup.y = (1.0 - uv.y) * relativeHeight + (1.0 - relativeHeight) / 2.0;
             }`,
 
             attributes: {
-                position: [
-                    -2, 0,
-                    0, -2,
-                    2, 2
-                ]
+                position: quad.positions
             },
+            elements: quad.cells,
 
             uniforms: {
                 renderSize: regl.prop<Uniforms, 'renderSize'>('renderSize'),
-                videoSize: regl.prop<Uniforms, 'videoSize'>('videoSize'),
-                videoFrame: regl.prop<Uniforms, 'videoFrame'>('videoFrame')
-            },
-
-            count: 3
+                inputSize: regl.prop<Uniforms, 'inputSize'>('inputSize'),
+                inputImage: regl.prop<Uniforms, 'inputImage'>('inputImage')
+            }
         });
 
         const cameraTexture = regl.texture(); // construct texture
@@ -93,8 +93,8 @@
             drawFrame({
                 // todo: canvasElement is null sometimes?
                 renderSize: [canvasElement.width, canvasElement.height],
-                videoSize: [videoElement.videoWidth, videoElement.videoHeight],
-                videoFrame: cameraTexture({
+                inputSize: [videoElement.videoWidth, videoElement.videoHeight],
+                inputImage: cameraTexture({
                     data: videoElement,
                     mag: 'linear',
                     min: 'linear'
@@ -144,26 +144,25 @@
 </script>
 
 <!-- svelte-ignore a11y-media-has-caption -->
-<video class="video-element"
-    autoplay={true}
-    playsInline={true}
-    muted={true}
-    bind:this={videoElement}
+<video
+	class="video-element"
+	autoplay={true}
+	playsInline={true}
+	muted={true}
+	bind:this={videoElement}
 />
-<canvas class="canvas-element" 
-    bind:this={canvasElement}
-/>
+<canvas class="canvas-element" bind:this={canvasElement} />
 
 <style>
-    .video-element {
-        position: absolute;
-        max-width: 100%;
-        max-height: 100%;
-        z-index: -1;
-    }
+	.video-element {
+		position: absolute;
+		max-width: 100%;
+		max-height: 100%;
+		z-index: -1;
+	}
 
-    .canvas-element {
-        width: 100%;
-        height: 100%;
-    }
+	.canvas-element {
+		width: 100%;
+		height: 100%;
+	}
 </style>

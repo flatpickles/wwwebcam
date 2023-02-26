@@ -1,6 +1,5 @@
 <script lang="ts">
-    import REGL from 'regl';
-    import createQuad from 'primitive-quad';
+	import EffectProcessor from '$lib/EffectProcessor';
 	import { onMount } from 'svelte';
 
     // todo: external interface
@@ -13,95 +12,6 @@
     let devices: MediaDeviceInfo[];
     let errorString: string;
     let selfieMode = true;
-
-    // Type definitions
-
-    interface Uniforms {
-        renderSize: REGL.Vec2,
-        inputSize: REGL.Vec2,
-        inputImage: REGL.Texture;
-    }
-
-    interface Attributes {
-        position: number[];
-    }
-
-    interface Props {
-        renderSize: REGL.Vec2,
-        inputSize: REGL.Vec2,
-        inputImage: REGL.Texture;
-    }
-
-    // Display stuff
-
-    function startRegl() {
-        updateCanvasShape(); // as late as possible
-
-        const quad = createQuad();
-        const regl = REGL(canvasElement);
-        const drawFrame = regl<Uniforms, Attributes, Props>({
-            frag: `
-            precision mediump float;
-            uniform sampler2D inputImage;
-            varying vec2 uv;
-            varying vec2 lookup;
-            
-            void main () {
-                vec4 texVal = texture2D(inputImage, lookup);
-                gl_FragColor = vec4(vec3(texVal.g), 1.0);
-            }`,
-
-            vert: `
-            precision mediump float;
-            attribute vec3 position;
-            uniform vec2 renderSize;
-            uniform vec2 inputSize;
-            varying vec2 uv;
-            varying vec2 lookup;
-
-            void main () {
-                // Set render positions
-                gl_Position = vec4(position.xyz, 1.0);
-                uv = gl_Position.xy * 0.5 + 0.5;
-
-                // Calculate aspect-corrected texture lookup position
-                float renderRatio = renderSize.x / renderSize.y;
-                float videoRatio = inputSize.x / inputSize.y;
-                float relativeWidth = min(1.0, renderRatio / videoRatio);
-                float relativeHeight = min(1.0, videoRatio / renderRatio);
-                lookup.x = (1.0 - uv.x) * relativeWidth + (1.0 - relativeWidth) / 2.0;
-                lookup.y = (1.0 - uv.y) * relativeHeight + (1.0 - relativeHeight) / 2.0;
-            }`,
-
-            attributes: {
-                position: quad.positions
-            },
-            elements: quad.cells,
-
-            uniforms: {
-                renderSize: regl.prop<Uniforms, 'renderSize'>('renderSize'),
-                inputSize: regl.prop<Uniforms, 'inputSize'>('inputSize'),
-                inputImage: regl.prop<Uniforms, 'inputImage'>('inputImage')
-            }
-        });
-
-        const cameraTexture = regl.texture(); // construct texture
-        regl.frame(() => {
-            regl.clear({
-                color: [0, 0, 0, 1]
-            });
-            drawFrame({
-                // todo: canvasElement is null sometimes?
-                renderSize: [canvasElement.width, canvasElement.height],
-                inputSize: [videoElement.videoWidth, videoElement.videoHeight],
-                inputImage: cameraTexture({
-                    data: videoElement,
-                    mag: 'linear',
-                    min: 'linear'
-                }) // update and use texture
-            });
-        });
-    }
 
     // Lifecycle & interaction stuff
 
@@ -135,7 +45,12 @@
             })
             .then(function (stream) {
                 videoElement.srcObject = stream;
-                videoElement.onloadeddata = startRegl;
+                videoElement.onloadeddata = () => {
+                    updateCanvasShape();
+
+                    const processor = new EffectProcessor(videoElement, canvasElement);
+                    processor.start();
+                }
             })
             .catch((error) => {
                 errorString = error.message;

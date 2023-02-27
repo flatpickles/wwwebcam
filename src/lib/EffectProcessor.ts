@@ -24,8 +24,7 @@ const defaultPixelShader = `
     varying vec2 lookup;
 
     void main () {
-        vec4 texVal = texture2D(inputImage, lookup);
-        gl_FragColor = vec4(vec3(texVal.g), 1.0);
+        gl_FragColor = texture2D(inputImage, lookup);
     }`;
 
 export default class EffectProcessor {

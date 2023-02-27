@@ -2,3 +2,7 @@ html, body {
     overflow: hidden; // no scrolling
     user-select: none; // no text selection
 }
+
+body {
+    background-color: #000; // black status bar on iOS
+}

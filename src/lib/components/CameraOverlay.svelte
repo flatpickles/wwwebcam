@@ -9,12 +9,12 @@
 
 <div class="overlay">
     <div class="top icons">
-        <ImageButton src={aboutImg} />
+        <ImageButton src={aboutImg} size="2em" />
     </div>
     <div class="bottom icons">
-        <ImageButton src={flipImg} />
-        <ImageButton src={captureImg} />
-        <ImageButton src={effectsImg} />
+        <ImageButton src={flipImg} size="3em" />
+        <ImageButton src={captureImg} size="4em" />
+        <ImageButton src={effectsImg} size="3em" />
     </div>
 </div>
 

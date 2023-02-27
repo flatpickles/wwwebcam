@@ -3,13 +3,14 @@
 This is an experimental project for now.
 
 To do:
-* Clean up CameraCanvas: internal design, external interface, etc.
-* Maybe make a lil module for camera device management?
-
-* Fix camera flipping on mobile
-* Start breaking things out into proper files
-* Tech design: swap in different filters (as slug routes?)
-* Basic UI design: capture image, select filter, flip camera
-* Finalize MVP with a couple very basic filters, move on
-
-* Maybe do aspect ratio correction in the vertex shader?
+* About: show/hide overlay when tapped
+* Enable camera flipping on mobile (WebCam.ts)
+* Enable swapping pixel shader (EffectProcessor.ts)
+* Filter list
+    * Show/hide overlay when tapped
+    * List available filters (GLSL files)
+    * Swap in the chosen one
+    * Explore slug routes for each filter
+* Image capture
+    * Save file directly if possible
+    * Use web share API if not (e.g. on mobile)

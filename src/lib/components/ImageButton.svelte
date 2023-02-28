@@ -3,7 +3,7 @@
     export let size: string;
 </script>
 
-<button style="--size: {size}">
+<button on:click style="--size: {size}">
     <img alt={src} src={src} />
 </button>
 

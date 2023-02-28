@@ -1,20 +1,19 @@
 <script lang="ts">
+	import AboutOverlay from './AboutOverlay.svelte';
     import ImageButton from './ImageButton.svelte';
-    import aboutImg from '$lib/assets/about.svg';
     import captureImg from '$lib/assets/capture.svg';
-    import closeImg from '$lib/assets/close.svg';
     import effectsImg from '$lib/assets/effects.svg';
     import flipImg from '$lib/assets/flip.svg';
 </script>
 
 <div class="overlay">
     <div class="top icons">
-        <ImageButton src={aboutImg} size="2em" />
+        <AboutOverlay />
     </div>
     <div class="bottom icons">
-        <ImageButton src={flipImg} size="3em" />
-        <ImageButton src={captureImg} size="4em" />
-        <ImageButton src={effectsImg} size="3em" />
+        <ImageButton src={flipImg} size="3rem" />
+        <ImageButton src={captureImg} size="4rem" />
+        <ImageButton src={effectsImg} size="3rem" />
     </div>
 </div>
 

@@ -6,8 +6,12 @@
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
 
+    let frontFacing = true;
+    let webCam: WebCam;
+
     export function flip() {
-        console.log('Flip camera.');
+        frontFacing = !frontFacing;
+        webCam.start(frontFacing ? 'user' : 'environment');
     }
 
     export function capture() {
@@ -24,7 +28,7 @@
         setTimeout(updateCanvasShape, 0);
 
         // Start video
-        const webCam = new WebCam(videoElement);
+        webCam = new WebCam(videoElement);
         webCam.start().then(() => {
             const processor = new EffectProcessor(videoElement, canvasElement);
             processor.start();

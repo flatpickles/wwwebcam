@@ -1,8 +1,13 @@
 html, body {
-    overflow: hidden; // no scrolling
-    user-select: none; // no text selection
+    overflow: hidden; /* no scrolling */
+    user-select: none; /* no text selection */
 }
 
 body {
-    background-color: #000; // black status bar on iOS
+    background-color: #000; /* black status bar on iOS */
+}
+
+/* no button highlight */
+input, textarea, button, select, a {
+    -webkit-tap-highlight-color: transparent;
 }

@@ -1,9 +1,30 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
 	import AboutOverlay from './AboutOverlay.svelte';
     import ImageButton from './ImageButton.svelte';
     import captureImg from '$lib/assets/capture.svg';
-    import effectsImg from '$lib/assets/effects.svg';
     import flipImg from '$lib/assets/flip.svg';
+    import starImg from '$lib/assets/star.svg';
+    import starImgFilled from '$lib/assets/star_filled.svg';
+
+    const dispatch = createEventDispatcher();
+    let effectEnabled = false;
+
+    function flipClicked() {
+        dispatch('flip', {});
+    }
+
+    function captureClicked() {
+        dispatch('capture', {});
+    }
+
+    function effectClicked() {
+        effectEnabled = !effectEnabled;
+        dispatch('effect', {
+            enabled: effectEnabled
+        });
+    }
 </script>
 
 <div class="overlay">
@@ -11,9 +32,9 @@
         <AboutOverlay />
     </div>
     <div class="bottom icons">
-        <ImageButton src={flipImg} size="3rem" />
-        <ImageButton src={captureImg} size="4rem" />
-        <ImageButton src={effectsImg} size="3rem" />
+        <ImageButton src={flipImg} on:click={flipClicked} size="3rem" />
+        <ImageButton src={captureImg} on:click={captureClicked} size="4rem" />
+        <ImageButton src={effectEnabled ? starImgFilled : starImg} on:click={effectClicked} size="3rem" />
     </div>
 </div>
 

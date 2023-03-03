@@ -3,7 +3,6 @@
 This is an experimental project for now.
 
 To do:
-* About: show/hide overlay when tapped
 * Enable camera flipping on mobile (WebCam.ts)
 * Enable swapping pixel shader (EffectProcessor.ts)
 * Filter list

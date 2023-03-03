@@ -6,6 +6,18 @@
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
 
+    export function flip() {
+        console.log('Flip camera.');
+    }
+
+    export function capture() {
+        console.log('Capture canvas image.');
+    }
+
+    export function enableEffect(enabled: boolean) {
+        console.log('Enable effect.');
+    }
+
 	onMount(async () => {
         // Setup canvas sizing
         window.onresize = updateCanvasShape;

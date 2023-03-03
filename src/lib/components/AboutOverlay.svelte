@@ -19,8 +19,6 @@
                 !aboutContainer.contains(event.target as Node) &&
                 !buttonContainer.contains(event.target as Node)) {
                 show = false;
-                // todo: doesn't seem we can prevent event in this case, i.e. other thing
-                // will still be clicked upon, maybe janky
             };
         });
     });
@@ -49,6 +47,7 @@
     .about-container {
         position: absolute;
         top: 3.5rem;
+        right: 1rem;
         padding: 1rem;
         margin-left: 1rem;
 
@@ -66,6 +65,6 @@
     }
 
     .hidden {
-        opacity: 0;
+        opacity: 0%;
     }
 </style>

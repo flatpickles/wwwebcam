@@ -4,17 +4,19 @@ import createQuad from 'primitive-quad';
 interface Uniforms {
     renderSize: REGL.Vec2,
     inputSize: REGL.Vec2,
-    inputImage: REGL.Texture;
+    inputImage: REGL.Texture,
+    flipX: boolean,
 }
 
 interface Attributes {
-    position: number[];
+    position: number[],
 }
 
 interface Props {
     renderSize: REGL.Vec2,
     inputSize: REGL.Vec2,
-    inputImage: REGL.Texture;
+    inputImage: REGL.Texture,
+    flipX: boolean,
 }
 
 const defaultPixelShader = `
@@ -28,6 +30,8 @@ const defaultPixelShader = `
     }`;
 
 export default class EffectProcessor {
+    flipX = true;
+
     private regl: REGL.Regl;
     private draw: REGL.DrawCommand;
     private source: HTMLVideoElement;
@@ -47,6 +51,7 @@ export default class EffectProcessor {
             attribute vec3 position;
             uniform vec2 renderSize;
             uniform vec2 inputSize;
+            uniform bool flipX;
             varying vec2 uv;
             varying vec2 lookup;
 
@@ -60,7 +65,7 @@ export default class EffectProcessor {
                 float videoRatio = inputSize.x / inputSize.y;
                 float relativeWidth = min(1.0, renderRatio / videoRatio);
                 float relativeHeight = min(1.0, videoRatio / renderRatio);
-                lookup.x = (1.0 - uv.x) * relativeWidth + (1.0 - relativeWidth) / 2.0;
+                lookup.x = (flipX ? (1.0 - uv.x) : uv.x) * relativeWidth + (1.0 - relativeWidth) / 2.0;
                 lookup.y = (1.0 - uv.y) * relativeHeight + (1.0 - relativeHeight) / 2.0;
             }`,
 
@@ -72,7 +77,8 @@ export default class EffectProcessor {
             uniforms: {
                 renderSize: this.regl.prop<Uniforms, 'renderSize'>('renderSize'),
                 inputSize: this.regl.prop<Uniforms, 'inputSize'>('inputSize'),
-                inputImage: this.regl.prop<Uniforms, 'inputImage'>('inputImage')
+                inputImage: this.regl.prop<Uniforms, 'inputImage'>('inputImage'),
+                flipX: this.regl.prop<Uniforms, 'flipX'>('flipX'),
             }
         });
     }
@@ -90,11 +96,12 @@ export default class EffectProcessor {
                 // todo: canvasElement is null sometimes?
                 renderSize: [this.target.width, this.target.height],
                 inputSize: [this.source.videoWidth, this.source.videoHeight],
-                inputImage: cameraTexture({
+                inputImage: cameraTexture({ // todo: invalid texture shape when flipping
                     data: this.source,
                     mag: 'linear',
                     min: 'linear'
-                }) // update and use texture
+                }), // update and use texture
+                flipX: this.flipX
             });
         });
     }

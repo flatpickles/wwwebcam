@@ -8,10 +8,12 @@
 
     let frontFacing = true;
     let webCam: WebCam;
+    let effectProcessor: EffectProcessor;
 
     export function flip() {
         frontFacing = !frontFacing;
         webCam.start(frontFacing ? 'user' : 'environment');
+        effectProcessor.flipX = frontFacing;
     }
 
     export function capture() {
@@ -30,8 +32,8 @@
         // Start video
         webCam = new WebCam(videoElement);
         webCam.start().then(() => {
-            const processor = new EffectProcessor(videoElement, canvasElement);
-            processor.start();
+            effectProcessor = new EffectProcessor(videoElement, canvasElement);
+            effectProcessor.start();
         });
 	});
     

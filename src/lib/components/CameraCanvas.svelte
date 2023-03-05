@@ -21,7 +21,7 @@
     }
 
     export function enableEffect(enabled: boolean) {
-        console.log('Enable effect.');
+        effectProcessor.start();
     }
 
 	onMount(async () => {
@@ -33,7 +33,7 @@
         webCam = new WebCam(videoElement);
         webCam.start().then(() => {
             effectProcessor = new EffectProcessor(videoElement, canvasElement);
-            effectProcessor.start();
+            effectProcessor.start(); // start with default (passthrough) shader
         });
 	});
     

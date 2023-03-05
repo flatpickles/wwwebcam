@@ -36,6 +36,7 @@ export default class EffectProcessor {
     private draw: REGL.DrawCommand;
     private source: HTMLVideoElement;
     private target: HTMLCanvasElement;
+    private nextSaveName: string | null = null;
 
     constructor(source: HTMLVideoElement, target: HTMLCanvasElement) {
         this.source = source;
@@ -89,9 +90,12 @@ export default class EffectProcessor {
 
         const cameraTexture = this.regl.texture(); // construct texture
         this.tick = this.regl.frame(() => {
+            // Clear the canvas
             this.regl.clear({
                 color: [0, 0, 0, 1]
             });
+
+            // Draw the next frame
             this.draw({
                 // todo: canvasElement is null sometimes?
                 renderSize: [this.target.width, this.target.height],
@@ -103,6 +107,45 @@ export default class EffectProcessor {
                 }), // update and use texture
                 flipX: this.flipX
             });
+
+            // Save the next frame (if needed)
+            if (this.nextSaveName) {
+                this.saveFrame(this.nextSaveName);
+                this.nextSaveName = null;
+            }
+        });
+    }
+
+    saveNextFrame(filename: string) {
+        // saveFrame can only be called immediately after drawing a frame; called within update loop
+        // https://webglfundamentals.org/webgl/lessons/webgl-tips.html
+        this.nextSaveName = filename;
+    }
+
+    private saveFrame(filename: string) {
+        this.target.toBlob((blob) => {
+            if (!blob) throw new Error('Image could not be exported.');
+    
+            // Configure a link to download the blob
+            const link = document.createElement('a');
+            link.style.visibility = 'hidden';
+            link.target = '_blank';
+            link.download = filename;
+            link.href = window.URL.createObjectURL(blob);
+            document.body.appendChild(link);
+
+            // Remove link when clicked
+            link.onclick = () => {
+                link.onclick = null;
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(link.href);
+                    if (link.parentElement) link.parentElement.removeChild(link);
+                    link.removeAttribute('href');
+                });
+            };
+
+            // Click the link to force the download
+            link.click();
         });
     }
 }

@@ -2,14 +2,13 @@
 
 This is an experimental project for now.
 
-To do:
-* Enable camera flipping on mobile (WebCam.ts)
+MVP:
 * Enable swapping pixel shader (EffectProcessor.ts)
-* Filter list
-    * Show/hide overlay when tapped
-    * List available filters (GLSL files)
-    * Swap in the chosen one
-    * Explore slug routes for each filter
-* Image capture
-    * Save file directly if possible
-    * Use web share API if not (e.g. on mobile)
+* A single nice effect on/off with tap
+* Improve basic UI (janky drop shadow + scale on mobile)
+* Typography: roboto?
+* Write the "about" info, link to and fill out this readme
+
+Next steps:
+* Multiple filters! Selector, slug routes, etc.
+* Explore web share API on mobile (faster camera roll save?)

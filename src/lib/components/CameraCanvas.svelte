@@ -17,7 +17,7 @@
     }
 
     export function capture() {
-        console.log('Capture canvas image.');
+        effectProcessor.saveNextFrame('photo');
     }
 
     export function enableEffect(enabled: boolean) {

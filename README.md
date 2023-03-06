@@ -17,6 +17,7 @@ A parallel goal for this project is to create a publishing surface for video pro
 
 ### Known issues
 
+- Canvas & camera image are seemingly lower resolution than the camera input, most noticeable on large screens.
 - "Uncaught Error: (regl) invalid texture shape" while camera is flipping. No adverse side effects, but it's ugly.
 - Potentially related to the above: canvasElement is occasionally undefined in draw calls.
 - Some unusual canvas resize events (e.g. show dev tools) can warp the canvas aspect ratio.

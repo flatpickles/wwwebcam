@@ -8,6 +8,7 @@ A parallel goal for this project is to create a publishing surface for video pro
 
 ### Next steps
 
+- Better camera access permissions handling: improve UX for declined permissions request.
 - Add more video filters (shaders), and make them accessible from a scroll view and URL routes (e.g. wwweb.cam/bw).
 - App UI is prototype fidelity; make it prettier!
 - Captured image files save to "Files" on iOS; maybe use the web share API to enable an easier Camera Roll option.

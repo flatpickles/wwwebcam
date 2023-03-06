@@ -1,13 +1,21 @@
-html, body {
-    overflow: hidden; /* no scrolling */
-    user-select: none; /* no text selection */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap');
+
+html,
+body {
+	overflow: hidden; /* no scrolling */
+	user-select: none; /* no text selection */
 }
 
 body {
-    background-color: #000; /* black status bar on iOS */
+	background-color: #000; /* black status bar on iOS */
+	font-family: 'Roboto', sans-serif;
 }
 
 /* no button highlight */
-input, textarea, button, select, a {
-    -webkit-tap-highlight-color: transparent;
+input,
+textarea,
+button,
+select,
+a {
+	-webkit-tap-highlight-color: transparent;
 }

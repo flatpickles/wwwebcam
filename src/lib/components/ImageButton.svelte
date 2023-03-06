@@ -9,7 +9,7 @@
 
 <style>
     button {
-        filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.75));
+        /* filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.75)); */
         transition: transform 0.05s ease-out;
     }
 

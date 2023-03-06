@@ -34,16 +34,27 @@
 
 <div class="about-container" bind:this={aboutContainer} class:hidden={!show}>
     <p>
-        <b>World Wide Webcam</b> is an experiment, exploring building a camera app in the browser.
-        World Wide Webcam is an experiment, exploring building a camera app in the browser.
-        World Wide Webcam is an experiment, exploring building a camera app in the browser.
-        World Wide Webcam is an experiment, exploring building a camera app in the browser.
-        World Wide Webcam is an experiment, exploring building a camera app in the browser.
-        World Wide Webcam is an experiment, exploring building a camera app in the browser.
+        <b>World Wide Webcam</b> is a prototype for a browser-based camera app. It's
+        designed with mobile web in mind, but should work fine in your desktop browser of choice as
+        well. The goal of this app is to explore multimedia limitations in the browser, and as
+        expected, it's a far cry from your native camera. Maybe we'll get there someday!
+    </p>
+
+    <p>
+        Built by <a href="https://flatpickles.com">flatpickles</a>.
+        Read more <a href="https://github.com/flatpickles/wwwebcam">on GitHub</a>.
     </p>
 </div>
 
 <style>
+    p:not(:first-child) {
+        padding-top: 1rem;
+    }
+
+    a {
+        color: white;
+    }
+
     .about-container {
         position: absolute;
         top: 3.5rem;
@@ -54,11 +65,10 @@
         max-width: 30rem;
         border-radius: 1rem;
         text-align: justify;
-        line-height: 1.3em;
         font-size: 1.1rem;
+        user-select: text;
 
-        /* todo: centralize some things */
-        filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.75));
+        /* filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.75)); */
         transition: opacity 0.2s ease-out;
         background-color: rgba(0, 0, 0, 0.9);
         color: white;

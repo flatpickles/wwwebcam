@@ -34,10 +34,10 @@
 
 <div class="about-container" bind:this={aboutContainer} class:hidden={!show}>
     <p>
-        <b>World Wide Webcam</b> is a prototype for a browser-based camera app. It's
-        designed with mobile web in mind, but should work fine in your desktop browser of choice as
-        well. The goal of this app is to explore multimedia limitations in the browser, and as
-        expected, it's a far cry from your native camera. Maybe we'll get there someday!
+        <b>World Wide Webcam</b> is a prototype for a browser-based camera app. It's designed with
+        mobile web in mind, but should work fine in your desktop browser as well. The primary goal
+        of this project is to explore multimedia limitations in the browser, and as expected, it's
+        not nearly as capable your native camera. Maybe we'll get there someday!
     </p>
 
     <p>

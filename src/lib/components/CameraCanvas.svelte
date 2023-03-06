@@ -3,6 +3,10 @@
 	import WebCam from '$lib/WebCam';
 	import { onMount } from 'svelte';
 
+    // Just one effect, for now!
+    import defaultFrag from '../shaders/default.frag?raw';
+    import effectFrag from '../shaders/bw.frag?raw';
+
 	let videoElement: HTMLVideoElement;
     let canvasElement: HTMLCanvasElement;
 
@@ -21,7 +25,7 @@
     }
 
     export function enableEffect(enabled: boolean) {
-        effectProcessor.start();
+        effectProcessor.start(enabled ? effectFrag : defaultFrag);
     }
 
 	onMount(async () => {

@@ -32,7 +32,7 @@
     />
 </div>
 
-<div class="about-container" bind:this={aboutContainer} class:hidden={!show}>
+<div class="about-container" bind:this={aboutContainer} class:show={show}>
     <p>
         <b>World Wide Webcam</b> is a prototype for a browser-based camera app. It's designed with
         mobile web in mind, but should work fine in your desktop browser as well. The primary goal
@@ -72,9 +72,10 @@
         transition: opacity 0.2s ease-out;
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
+        opacity: 0%
     }
 
-    .hidden {
-        opacity: 0%;
+    .show {
+        opacity: 100%;
     }
 </style>
